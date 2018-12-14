@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.futrue.schedule.dao.business.order.OrderDao" >
+  <resultMap id="BaseResultMap" type="com.futrue.common.entity.order.Order" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="order_no" property="orderNo" jdbcType="VARCHAR" />
+    <result column="product_amount_total" property="productAmountTotal" jdbcType="DECIMAL" />
+    <result column="order_amount_total" property="orderAmountTotal" jdbcType="DECIMAL" />
+    <result column="price_unit" property="priceUnit" jdbcType="VARCHAR" />
+    <result column="payment_order_no" property="paymentOrderNo" jdbcType="VARCHAR" />
+    <result column="street" property="street" jdbcType="VARCHAR" />
+    <result column="phone_number" property="phoneNumber" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="order_type" property="orderType" jdbcType="TINYINT" />
+    <result column="pay_channel" property="payChannel" jdbcType="VARCHAR" />
+    <result column="pay_time" property="payTime" jdbcType="TIMESTAMP" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="provider_id" property="providerId" jdbcType="BIGINT" />
+    <result column="mark" property="mark" jdbcType="VARCHAR" />
+    <result column="order_status" property="orderStatus" jdbcType="BIT" />
+    <result column="payment_config_info" property="paymentConfigInfo" jdbcType="VARCHAR" />
+    <result column="create_date_time" property="createDateTime" jdbcType="TIMESTAMP" />
+    <result column="update_date_time" property="updateDateTime" jdbcType="TIMESTAMP" />
+    <result column="deleted" property="deleted" jdbcType="BIT" />
+    <result column="version" property="version" jdbcType="BIGINT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, order_no, product_amount_total, order_amount_total, price_unit, payment_order_no, 
+    street, phone_number, name, order_type, pay_channel, pay_time, user_id, provider_id, 
+    mark, order_status, payment_config_info, create_date_time, update_date_time, deleted, 
+    version
+  </sql>
+
+  <insert id="save" parameterType="com.futrue.common.entity.order.Order" >
+    insert into `order` (id, order_no, product_amount_total,
+      order_amount_total, price_unit, payment_order_no, 
+      street, phone_number, name, 
+      order_type, pay_channel, pay_time, 
+      user_id, provider_id, mark, 
+      order_status, payment_config_info, create_date_time, 
+      update_date_time, deleted, version
+      )
+    values (#{id,jdbcType=BIGINT}, #{orderNo,jdbcType=VARCHAR}, #{productAmountTotal,jdbcType=DECIMAL}, 
+      #{orderAmountTotal,jdbcType=DECIMAL}, #{priceUnit,jdbcType=VARCHAR}, #{paymentOrderNo,jdbcType=VARCHAR}, 
+      #{street,jdbcType=VARCHAR}, #{phoneNumber,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{orderType,jdbcType=TINYINT}, #{payChannel,jdbcType=VARCHAR}, #{payTime,jdbcType=TIMESTAMP}, 
+      #{userId,jdbcType=BIGINT}, #{providerId,jdbcType=BIGINT}, #{mark,jdbcType=VARCHAR}, 
+      #{orderStatus,jdbcType=BIT}, #{paymentConfigInfo,jdbcType=VARCHAR}, #{createDateTime,jdbcType=TIMESTAMP}, 
+      #{updateDateTime,jdbcType=TIMESTAMP}, #{deleted,jdbcType=BIT}, #{version,jdbcType=BIGINT}
+      )
+  </insert>
+
+
+  <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from `order`
+    where id = #{id,jdbcType=BIGINT} and deleted = 0
+  </select>
+
+
+  <select id="findByOrderStatus" resultMap="BaseResultMap">
+
+    select
+      <include refid="Base_Column_List" />
+    from `order` o
+    <![CDATA[
+    where o.create_date_time < DATE_SUB(NOW(),INTERVAL 60 MINUTE) and o.order_status = 0 and deleted = 0
+    ]]>
+  </select>
+
+  <update id="updateStatus">
+    update `order` o
+    set
+      o.order_status = 5,
+      o.update_date_time = NOW()
+    where o.id in
+    <foreach collection="list" open="(" separator="," close=")" item="item" index="index" >
+      #{item.id}
+    </foreach>
+  </update>
+
+
+</mapper>
